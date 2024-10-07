@@ -23,15 +23,15 @@ class problem():
         self.out = [False for _ in range(self.n)]
         
         # 체스판 바깥도 벽으로 취급하므로 체스판의 전체 길이를 (L+1)*(L+1)로 취급
-        self.board_map = [[2 for _ in range(self.l+1)]]
+        self.board_map = [[2 for _ in range(self.l+2)]]
         for _ in range(self.l):
             self.board_map.append([2] + list(map(int, input().split())) + [2])
-        self.board_map.append([2 for _ in range(self.l+1)])
+        self.board_map.append([2 for _ in range(self.l+2)])
         
         # 기사의 체력
         self.hp = [0 for _ in range(self.n)]
 
-        self.board_knight = [[-1 for _ in range(self.l+1)] for _ in range(self.l+1)]
+        self.board_knight = [[-1 for _ in range(self.l+2)] for _ in range(self.l+2)]
         for id in range(self.n):
             r, c, h, w, k = map(int, input().split())
 
@@ -48,6 +48,7 @@ class problem():
 
             # 기사의 체력 추가
             self.hp[id] = k
+        self.board_knight.append([2 for _ in range(self.l+2)])
         
         self.hp_original = self.hp[:]
         # 방향 d는 0, 1, 2, 3 중 하나이며, 각각 위쪽, 오른쪽, 아래쪽, 왼쪽을 의미한다
@@ -78,7 +79,7 @@ class problem():
             for j in range(ny, ny+w):
                 if self.board_map[i][j] == 2:
                     return
-                
+
         # 새로운 위치에 다른 기사가 있다면 연쇄반응을 시작한다
         # 동시에 여러 기사가 반응할 수 있고, 그 중 하나라도 연쇄반응 과정에서 벽에 부딪히는 기사가 있다면 이동이 취소되므로 우선 따로 명단을 만들어 관리
         for i in range(nx, nx+h):
@@ -113,6 +114,8 @@ class problem():
             return
         
         # 연쇄반응이 일어날 수 있다면 모든 기사를 연쇄반응에 따라 이동시킨다
+        #for sub_id in interaction_knights:
+        #    self.interaction(sub_id, direction)
         global visited
         visited = [False for _ in range(self.n)]
         self.refill_board(id)
@@ -239,7 +242,6 @@ class problem():
                         self.refill_board(id)
                         return
 
-
 def main():
     instance = problem()
     for _ in range(instance.q):
@@ -251,6 +253,7 @@ def main():
     
     # 생존한 기사들이 받은 데미지의 총합
     total_damage = 0
+
     for id in range(instance.n):
         if instance.out[id] == True:
             continue
