@@ -39,6 +39,7 @@ class problem():
                     continue
                 # 이후 단계
                 if power < min_power:
+                    min_power = power
                     player = [i, j]
                 elif power == min_power:
                     # 가장 최근에 공격한 포탑 선택
@@ -68,7 +69,7 @@ class problem():
         for i in range(self.n):
             for j in range(self.m):
                 power = self.board_power[i][j]
-
+                
                 # 이미 부서진 포탑은 고려하지 않는다
                 if power == 0:
                     continue
@@ -145,6 +146,7 @@ class problem():
         if best_history == None:
             laser_success = False
             return
+        
 
         # 공격 대상에는 공격자의 공격력만큼 피해를 입힌다
         self.board_power[target[0]][target[1]] = max(0, self.board_power[target[0]][target[1]] - self.board_power[player[0]][player[1]])
@@ -196,7 +198,7 @@ class problem():
 
         dx = [0, 1, 0, -1]
         dy = [1, 0, -1, 0]
-
+        #arr = []
         for i in range(len(dx)):
             nx = x + dx[i]
             ny = y + dy[i]
@@ -256,6 +258,8 @@ class problem():
                     continue
                 if [i, j] in history:
                     continue
+                if [i, j] == target:
+                    continue
                 if [i, j] == player:
                     continue
                 self.board_power[i][j] += 1
@@ -294,10 +298,8 @@ class problem():
 
 def main():
     instance = problem()
-
     for t in range(instance.k):
         instance.attack(t)
-
         if instance.do_break():
             break
     
