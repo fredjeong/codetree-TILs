@@ -54,12 +54,6 @@ class problem():
                             if j > player[1]:
                                 player = [i, j]
 
-        # 공격자로 선정된 포탑의 공격치 올려주기
-        self.board_power[player[0]][player[1]] += self.n + self.m
-
-        # self.board_time 갱신
-        self.board_time[player[0]][player[1]] = t
-
         return player
 
     def select_target(self):
@@ -74,6 +68,7 @@ class problem():
         for i in range(self.n):
             for j in range(self.m):
                 power = self.board_power[i][j]
+
                 # 이미 부서진 포탑은 고려하지 않는다
                 if power == 0:
                     continue
@@ -85,6 +80,7 @@ class problem():
                     continue
                 # 이후 단계
                 if power > max_power:
+                    max_power = power
                     target = [i, j]
                 elif power == max_power:
                     # 가장 공격한지 오래된 포탑 선택
@@ -113,6 +109,12 @@ class problem():
         # 공격을 받는 포탑의 좌표 선택
         target_pos = self.select_target()
 
+        # 공격자로 선정된 포탑의 공격치 올려주기
+        self.board_power[player_pos[0]][player_pos[1]] += self.n + self.m
+
+        # self.board_time 갱신
+        self.board_time[player_pos[0]][player_pos[1]] = t
+
         # 레이저 공격 시도
         global laser_success
         laser_success = True
@@ -139,11 +141,10 @@ class problem():
         visited = [[False for _ in range(self.m)] for _ in range(self.n)]
 
         self.laser_dfs(player, target, [], [], visited)
-
+        
         if best_history == None:
             laser_success = False
             return
-        
 
         # 공격 대상에는 공격자의 공격력만큼 피해를 입힌다
         self.board_power[target[0]][target[1]] = max(0, self.board_power[target[0]][target[1]] - self.board_power[player[0]][player[1]])
@@ -195,7 +196,7 @@ class problem():
 
         dx = [0, 1, 0, -1]
         dy = [1, 0, -1, 0]
-        #arr = []
+
         for i in range(len(dx)):
             nx = x + dx[i]
             ny = y + dy[i]
@@ -217,6 +218,7 @@ class problem():
             self.laser_dfs([nx, ny], target, history + [[nx, ny]], direction + [i], new_visited)
 
     def bomb(self, player, target):
+
         # 공격 대상에는 공격자의 공격력만큼 피해를 입힌다
         self.board_power[target[0]][target[1]] = max(0, self.board_power[target[0]][target[1]] - self.board_power[player[0]][player[1]])
         
@@ -295,6 +297,7 @@ def main():
 
     for t in range(instance.k):
         instance.attack(t)
+
         if instance.do_break():
             break
     
