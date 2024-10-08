@@ -1,4 +1,5 @@
 import sys
+from collections import deque
 
 input = sys.stdin.readline
 
@@ -118,9 +119,10 @@ class problem():
 
         # 레이저 공격 시도
         global laser_success
-        laser_success = True
+        laser_success = False
+
         self.laser(player_pos, target_pos)
-        
+
         if laser_success == True:
             return
         
@@ -136,88 +138,65 @@ class problem():
         player에서 target까지 최단 경로로 공격한다
         경로의 길이가 똑같은 최단 경로가 2개 이상이라면 우/하/좌/상의 우선순위대로 먼저 움직인 경로가 선택된다
         """
-        global best_history, best_direction, laser_success
-        best_history = None
-        best_direction = None
+        global laser_success
+
         visited = [[False for _ in range(self.m)] for _ in range(self.n)]
 
-        self.laser_dfs(player, target, [], [], visited)
+        q = deque()
+        q.append([player])
         
-        if best_history == None:
-            laser_success = False
+        dx = [0, 1, 0, -1]
+        dy = [1, 0, -1, 0]
+
+        while q:
+            history = q.popleft()
+            x = history[-1][0]
+            y = history[-1][1]
+            
+            if visited[x][y] == True:
+                continue
+            visited[x][y] = True
+
+            if [x, y] == target:
+                laser_success = True
+                break
+
+            for i in range(len(dx)):
+                nx = x + dx[i]
+                ny = y + dy[i]
+
+                if nx < 0:
+                    nx += self.n
+                elif nx >= self.n:
+                    nx -= self.n
+                if ny < 0:
+                    ny += self.m
+                elif ny >= self.m:
+                    ny -= self.m
+                
+                if visited[nx][ny] == True:
+                    continue
+                if self.board_power[nx][ny] == 0:
+                    continue
+
+                q.append(history + [[nx, ny]])
+
+        if laser_success == False:
             return
         
-
-        # 공격 대상에는 공격자의 공격력만큼 피해를 입힌다
         self.board_power[target[0]][target[1]] = max(0, self.board_power[target[0]][target[1]] - self.board_power[player[0]][player[1]])
         
-        for i in range(len(best_history)-1):
-            self.board_power[best_history[i][0]][best_history[i][1]] = max(0, self.board_power[best_history[i][0]][best_history[i][1]] - (self.board_power[player[0]][player[1]] // 2))
-        
+        for i in range(1, len(history)-1):
+            self.board_power[history[i][0]][history[i][1]] = max(0, self.board_power[history[i][0]][history[i][1]] - (self.board_power[player[0]][player[1]] // 2))        
+
         # 부서지지 않은 포탑 중 공격과 무관한 포탑의 공격력 증가
         for i in range(self.n):
             for j in range(self.m):
                 if self.board_power[i][j] == 0:
                     continue
-                if [i, j] in best_history:
-                    continue
-                if [i, j] == player:
-                    continue
-                if [i, j] == target:
+                if [i, j] in history:
                     continue
                 self.board_power[i][j] += 1
-
-    def laser_dfs(self, cur_pos, target, history, direction, visited):
-        global best_history, best_direction
-        x, y = cur_pos
-        new_visited = []
-        for i in range(len(visited)):
-            new_visited.append(visited[i][:])
-        
-        if new_visited[x][y] == True:
-            return
-        new_visited[x][y] = True
-        
-        if cur_pos == target:
-            if best_history == None:
-                best_history = history
-                best_direction = direction
-                return
-            if len(history) < len(best_history):
-                best_history = history
-                best_direction = direction
-                return
-            elif len(history) == len(best_history):
-                temp = [direction, best_direction]
-                temp = sorted(temp)
-                
-                if direction == temp[0]:
-                    best_history = history
-                    best_direction = direction
-                return
-
-        dx = [0, 1, 0, -1]
-        dy = [1, 0, -1, 0]
-        #arr = []
-        for i in range(len(dx)):
-            nx = x + dx[i]
-            ny = y + dy[i]
-
-            if nx < 0:
-                nx += self.n
-            elif nx >= self.n:
-                nx -= self.n
-
-            if ny < 0:
-                ny += self.m
-            elif ny >= self.m:
-                ny -= self.m
-            
-            if self.board_power[nx][ny] == 0:
-                continue
-            if new_visited[nx][ny] == True:
-                continue
-            self.laser_dfs([nx, ny], target, history + [[nx, ny]], direction + [i], new_visited)
 
     def bomb(self, player, target):
 
@@ -298,6 +277,7 @@ class problem():
 
 def main():
     instance = problem()
+
     for t in range(instance.k):
         instance.attack(t)
         if instance.do_break():
