@@ -22,7 +22,6 @@ class problem():
         for _ in range(self.m):
             x, y = list(map(int, input().split()))
             self.destination.append([x - 1, y - 1])
-
         self.count = 0 # count = m일 때 프로글매을 종료하고 count를 리턴한다
         self.player_pos = []
         self.lock_list = []
@@ -54,7 +53,6 @@ class problem():
             q.append([self.player_pos[i]])
 
             visited = [[False for _ in range(self.n)] for _ in range(self.n)]
-            visited[self.player_pos[i][0]][self.player_pos[i][1]] = True
             
             # 가고 싶은 편의점의 좌표
             cvs_pos = self.destination[i]
@@ -66,6 +64,10 @@ class problem():
                 history = q.popleft()
                 
                 x, y = history[-1]
+                if visited[x][y] == True:
+                    continue
+                visited[x][y] = True
+
 
                 if [x, y] == cvs_pos:
                     # 최단거리 경로를 찾았으므로 while문에서 벗어난다
