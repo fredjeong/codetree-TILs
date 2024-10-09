@@ -22,9 +22,8 @@ class problem():
         for _ in range(self.m):
             x, y = list(map(int, input().split()))
             self.destination.append([x - 1, y - 1])
-        self.count = 0 # count = m일 때 프로그램을 종료하고 count를 리턴한다
+        self.count = 0 # count = m일 때 프로글매을 종료하고 count를 리턴한다
         self.player_pos = []
-        self.lock_list = []
         self.out = [False for _ in range(self.m)]
     
     def get_distance(self, pos_1, pos_2):
@@ -93,8 +92,8 @@ class problem():
             if history[1] == cvs_pos:
                 self.out[i] = True
                 self.count += 1
-                # lock_list에 해당 편의점의 좌표 추가
-                self.lock_list.append(cvs_pos)
+                # locked에 해당 편의점의 좌표 추가
+                self.locked[cvs_pos[0]][cvs_pos[1]] = True
 
         # 처음 들어오는 사람은 자신이 가고 싶은 편의점과 가장 가까이 있는 베이스 캠프로 이동한다
         if i==t:
@@ -158,15 +157,7 @@ class problem():
 
             # i=t번 사람의 위치가 정해졌으므로 이를 플레이어의 위치판에 추가해준다
             self.player_pos.append(min_pos)
-
-            # lock_list의 모든 위치들을 이동 불가로 선언해준다
-            for elem in self.lock_list:
-                self.locked[elem[0]][elem[1]] = True
-
-            # lock list를 초기화해준다
-            self.lock_list = []
-
-
+            
 def main():
     instance = problem()
     
