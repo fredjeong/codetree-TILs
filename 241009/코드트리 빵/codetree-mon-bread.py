@@ -87,6 +87,8 @@ class problem():
 
                     if self.locked[nx][ny] == True:
                         continue
+                    #if [nx, ny] in self.lock_list:
+                    #    continue
 
                     q.append(history + [[nx, ny]])
             
@@ -124,7 +126,13 @@ class problem():
                 if self.board[x][y] == 1:
                     if min_pos == None:
                         min_pos = [x, y]
-                        break
+                        
+                    else:
+                        if x < min_pos[0]:
+                            min_pos = [x, y]
+                        elif x == min_pos[0]:
+                            if y < min_pos[1]:
+                                min_pos = [x, y]
 
                 for idx in range(len(dx)):
                     nx = x + dx[idx]
@@ -160,11 +168,12 @@ class problem():
             # i=t번 사람의 위치가 정해졌으므로 이를 플레이어의 위치판에 추가해준다
             self.player_pos.append(min_pos)
 
+
 def main():
     instance = problem()
     
     t = 0
-    while True:       
+    while True:        
         for i in range(instance.m):
             # i분에는 i번 사람까지 움직일 수 있다
             if i > t:
@@ -182,7 +191,7 @@ def main():
         # 모든 사람이 편의점에 도착했다면 
         if instance.count == instance.m:
             break
-    
+        
         t += 1
 
     print(t+1)
