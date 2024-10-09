@@ -189,11 +189,6 @@ class problem():
         else:
             heapq.heappush(self.board[x][y], -max_on_board)
 
-
-
-
-
-
 def main():
     instance = problem()
 
@@ -210,4 +205,5 @@ def main():
 
     print(" ".join(map(str, scores)))
 
-main()
+if __name__ == "__main__":
+    main()
