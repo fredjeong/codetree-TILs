@@ -14,7 +14,6 @@ class problem():
         player_pos: 0번 플레이어부터 m-1번 플레이어까지의 [행, 열]
         player_info: 0번 플레이어부터 m-1번 플레이어까지의 [점수, 방향, 초기 능력치, 가지고 있는 총의 공격력]
         방향 0, 1, 2, 3은 순서대로 상 우 하 좌를 의미
-        out: 탈락한 플레이어
         """
         self.n, self.m, self.k = map(int, input().split())
         self.board = [[[] for _ in range(self.n)] for _ in range(self.n)]
@@ -30,7 +29,6 @@ class problem():
             x, y, d, s = map(int, input().split())
             self.player_pos.append([x-1, y-1]) # 행, 열
             self.player_info.append([0, d, s, 0]) # 점수, 방향, 초기 능력치, 가지고 있는 총의 공격력
-        self.out = [False for _ in range(self.m)]
 
         self.dx = [-1, 0, 1, 0]
         self.dy = [0, 1, 0, -1]
