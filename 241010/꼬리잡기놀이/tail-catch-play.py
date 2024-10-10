@@ -16,7 +16,9 @@ class Problem():
         self.n, self.m, self.k = map(int, input().split())
         self.board = [list(map(int, input().split())) for _ in range(self.n)]
         self.scores = [0 for _ in range(self.m)]
+        self.directions = [None for _ in range(self.m)]
 
+        self.pos = [] # 팀별 위치 저장
         self.head_pos = []
         self.tail_pos = []
 
@@ -122,6 +124,7 @@ class Problem():
                 elif self.board[position][idx]==3:
                     # tail_pos에서 찾아서 점수 주기
                     team = self.tail_pos.index([position, idx])
+
                     # bfs로 팀 내에서 몇 번째 사람인지 찾기
                     q = deque()
                     q.append([position, idx])
@@ -148,7 +151,7 @@ class Problem():
                             if visited[nx][ny]:
                                 continue
 
-                            if self.board[nx][ny] == 4:
+                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 0:
                                 continue
 
                             child.append([nx, ny])
@@ -159,6 +162,7 @@ class Problem():
                             child = []
 
                     self.scores[team] += count ** 2
+
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
@@ -192,7 +196,7 @@ class Problem():
                             if visited[nx][ny]:
                                 continue
 
-                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 3:
+                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 0 or self.board[nx][ny] == 3:
                                 continue
 
                             child.append([nx, ny])
@@ -254,7 +258,7 @@ class Problem():
                             if visited[nx][ny]:
                                 continue
 
-                            if self.board[nx][ny] == 4:
+                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 0:
                                 continue
 
                             child.append([nx, ny])
@@ -298,7 +302,7 @@ class Problem():
                             if visited[nx][ny]:
                                 continue
 
-                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 3:
+                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 0 or self.board[nx][ny] == 3:
                                 continue
 
                             child.append([nx, ny])
@@ -360,7 +364,7 @@ class Problem():
                             if visited[nx][ny]:
                                 continue
 
-                            if self.board[nx][ny] == 4:
+                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 0:
                                 continue
 
                             child.append([nx, ny])
@@ -404,7 +408,7 @@ class Problem():
                             if visited[nx][ny]:
                                 continue
 
-                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 3:
+                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 0 or self.board[nx][ny] == 3:
                                 continue
 
                             child.append([nx, ny])
@@ -466,7 +470,7 @@ class Problem():
                             if visited[nx][ny]:
                                 continue
 
-                            if self.board[nx][ny] == 4:
+                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 0:
                                 continue
 
                             child.append([nx, ny])
@@ -510,7 +514,7 @@ class Problem():
                             if visited[nx][ny]:
                                 continue
 
-                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 3:
+                            if self.board[nx][ny] == 4 or self.board[nx][ny] == 0 or self.board[nx][ny] == 3:
                                 continue
 
                             child.append([nx, ny])
@@ -538,9 +542,9 @@ def main():
         # 각 팀의 이동
         for team in range(instance.m):
             instance.move(team)
-
         # 공 던지기
         instance.throw_ball(round)
+
     print(sum(instance.scores))
 
 if __name__ == "__main__":
