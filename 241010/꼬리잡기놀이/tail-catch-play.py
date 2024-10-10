@@ -57,19 +57,25 @@ class Problem():
                             if visited[nx][ny]:
                                 continue
 
-                            if self.board[nx][ny]==2:
-                                child.append([nx, ny])
-
                             if self.board[nx][ny] == 3:
                                 # 꼬리사람 좌표 저장
                                 tail_pos = [nx, ny]
                                 self.tail_pos.append(tail_pos)
                                 visited[nx][ny] = True
-                        if not q:
-                            length += 1
-                            q.extend(child)
-                            child = []
-                    self.sizes.append(length)
+                                continue
+
+                            if self.board[nx][ny] == 2:
+                                q.append([nx, ny])
+                                length += 1
+                                continue
+
+                                # child.append([nx, ny])
+
+                        #if not q:
+                        #    length += 1
+                        #    q.extend(child)
+                        #    child = []
+                    self.sizes.append(length + 1)
 
 
     def move(self, team):
@@ -89,20 +95,21 @@ class Problem():
             # 꼬리사람이 있다면 그건 루트가 꽉 차있다는 말
             if self.board[nx][ny] == 3:
                 for j in range(len(self.dx)):
-                    nnx = x + self.dx[j]
-                    nny = y + self.dy[j]
+                    nnx = nx + self.dx[j]
+                    nny = ny + self.dy[j]
                     if nnx < 0 or nnx >= self.n or nny < 0 or nny >= self.n:
                         continue
+                    # 그러면 꼬리사람의 위치 (nx, ny)가 머리사람의 위치가 된다
                     if self.board[nnx][nny] == 2:
                         # 머리사람 새 위치 저장
-                        self.board[nnx][nny] = 1
+                        self.board[nx][ny] = 1
 
-                        self.head_pos[team] = [nnx, nny]
+                        self.head_pos[team] = [nx, ny]
 
                         # 꼬리사람 새 위치 저장
-                        self.board[x][y] = 3
-                        self.tail_pos[team] = [x, y]
-                        self.board[nx][ny] = 2
+                        self.board[nnx][nny] = 3
+                        self.tail_pos[team] = [nnx, nny]
+                        self.board[x][y] = 2
                         return
 
         for i in range(len(self.dx)):
@@ -710,7 +717,6 @@ def main():
         # 각 팀의 이동
         for team in range(instance.m):
             instance.move(team)
-
         # 공 던지기
         instance.throw_ball(round)
 
