@@ -21,6 +21,7 @@ class Problem():
         self.pos = [] # 팀별 위치 저장
         self.head_pos = []
         self.tail_pos = []
+        self.sizes = []
 
         self.dx = [1, -1, 0, 0]
         self.dy = [0, 0, 1, -1]
@@ -36,7 +37,8 @@ class Problem():
                     q.append([i, j])
 
                     visited = [[False for _ in range(self.n)] for _ in range(self.n)]
-
+                    length = 1
+                    child = []
                     while q:
                         x, y = q.popleft()
 
@@ -56,33 +58,60 @@ class Problem():
                                 continue
 
                             if self.board[nx][ny]==2:
-                                q.append([nx, ny])
+                                child.append([nx, ny])
 
                             if self.board[nx][ny] == 3:
                                 # 꼬리사람 좌표 저장
                                 tail_pos = [nx, ny]
                                 self.tail_pos.append(tail_pos)
                                 visited[nx][ny] = True
+                        if not q:
+                            length += 1
+                            q.extend(child)
+                            child = []
+                    self.sizes.append(length)
 
 
     def move(self, team):
         head = self.head_pos[team]
+        x = head[0]
+        y = head[1]
         tail = self.tail_pos[team]
 
         # 각 팀은 머리사람을 따라 한 칸 이동한다
         # 이동 방향 결정
         for i in range(len(self.dx)):
+            nx = x + self.dx[i]
+            ny = y + self.dy[i]
+            if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
+                continue
+
+            # 꼬리사람이 있다면 그건 루트가 꽉 차있다는 말
+            if self.board[nx][ny] == 3:
+                for j in range(len(self.dx)):
+                    nnx = x + self.dx[j]
+                    nny = y + self.dy[j]
+                    if nnx < 0 or nnx >= self.n or nny < 0 or nny >= self.n:
+                        continue
+                    if self.board[nnx][nny] == 2:
+                        # 머리사람 새 위치 저장
+                        self.board[nnx][nny] = 1
+
+                        self.head_pos[team] = [nnx, nny]
+
+                        # 꼬리사람 새 위치 저장
+                        self.board[x][y] = 3
+                        self.tail_pos[team] = [x, y]
+                        self.board[nx][ny] = 2
+                        return
+
+        for i in range(len(self.dx)):
             nx = head[0] + self.dx[i]
             ny = head[1] + self.dy[i]
             if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
                 continue
-
-            # 꼬리사람이 있다면 그건 루트가 꽉 차있다는 말이므로 내버려둔다 (굳이 바꿀 필요 없다)
-            if self.board[nx][ny] == 3:
-                return
-
             # 빈칸이라면 거기로 이동한다
-            if self.board[nx][ny] == 4:
+            elif self.board[nx][ny] == 4:
                 self.board[nx][ny] = 1
                 # 머리사람 새 위치 저장
                 self.head_pos[team] = [nx, ny]
@@ -115,15 +144,35 @@ class Problem():
                 if self.board[position][idx]==1:
                     # head_pos에서 찾아서 점수 주기
                     team = self.head_pos.index([position, idx])
+
                     self.scores[team] += 1
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
+
                     return
 
                 elif self.board[position][idx]==3:
                     # tail_pos에서 찾아서 점수 주기
                     team = self.tail_pos.index([position, idx])
+
+                    for i in range(len(self.dx)):
+                        nx = self.head_pos[team][0] + self.dx[i]
+                        ny = self.head_pos[team][1] + self.dy[i]
+                        if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
+                            continue
+
+                        # 머리사람이 있다면 그건 루트가 꽉 차있다는 말이므로 내버려둔다 (굳이 바꿀 필요 없다)
+                        if self.board[nx][ny] == 3:
+                            self.scores[team] += self.sizes[team] ** 2
+
+                            # 머리, 꼬리 위치 바꾸기
+                            self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                            self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                            self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
+                            return
 
                     # bfs로 팀 내에서 몇 번째 사람인지 찾기
                     q = deque()
@@ -165,6 +214,8 @@ class Problem():
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
                 elif self.board[position][idx]==2:
@@ -209,6 +260,8 @@ class Problem():
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
 
                     return
 
@@ -222,15 +275,19 @@ class Problem():
                 if self.board[idx][position] == 1:
                     # head_pos에서 찾아서 점수 주기
                     team = self.head_pos.index([idx, position])
+
                     self.scores[team] += 1
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
                 elif self.board[idx][position] == 3:
                     # tail_pos에서 찾아서 점수 주기
                     team = self.tail_pos.index([idx, position])
+
                     # bfs로 팀 내에서 몇 번째 사람인지 찾기
                     q = deque()
                     q.append([idx, position])
@@ -271,6 +328,8 @@ class Problem():
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
                 elif self.board[idx][position] == 2:
@@ -289,6 +348,22 @@ class Problem():
 
                         if self.board[x][y] == 1:
                             team = self.head_pos.index([x, y])
+
+                            for i in range(len(self.dx)):
+                                nx = self.head_pos[team][0] + self.dx[i]
+                                ny = self.head_pos[team][1] + self.dy[i]
+                                if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
+                                    continue
+
+                                # 머리사람이 있다면 그건 루트가 꽉 차있다는 말
+                                if self.board[nx][ny] == 3:
+                                    self.scores[team] += self.sizes[team] ** 2
+
+                                # 머리, 꼬리 위치 바꾸기
+                                self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                                self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                                self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
+                                return
                             break
 
                         for i in range(len(self.dx)):
@@ -315,10 +390,11 @@ class Problem():
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
-
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
-                idx -= 1
+                idx += 1
 
         elif direction == 2:
             # 오른쪽에서 왼쪽
@@ -328,15 +404,35 @@ class Problem():
                 if self.board[position][idx] == 1:
                     # head_pos에서 찾아서 점수 주기
                     team = self.head_pos.index([position, idx])
+
                     self.scores[team] += 1
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
                 elif self.board[position][idx] == 3:
                     # tail_pos에서 찾아서 점수 주기
                     team = self.tail_pos.index([position, idx])
+
+                    for i in range(len(self.dx)):
+                        nx = self.head_pos[team][0] + self.dx[i]
+                        ny = self.head_pos[team][1] + self.dy[i]
+                        if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
+                            continue
+
+                        # 머리사람이 있다면 그건 루트가 꽉 차있다는 말
+                        if self.board[nx][ny] == 3:
+                            self.scores[team] += self.sizes[team] ** 2
+
+                            # 머리, 꼬리 위치 바꾸기
+                            self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                            self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                            self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
+                            return
+
                     # bfs로 팀 내에서 몇 번째 사람인지 찾기
                     q = deque()
                     q.append([position, idx])
@@ -377,6 +473,8 @@ class Problem():
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
                 elif self.board[position][idx] == 2:
@@ -395,6 +493,21 @@ class Problem():
 
                         if self.board[x][y] == 1:
                             team = self.head_pos.index([x, y])
+                            for i in range(len(self.dx)):
+                                nx = self.head_pos[team][0] + self.dx[i]
+                                ny = self.head_pos[team][1] + self.dy[i]
+                                if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
+                                    continue
+
+                                # 머리사람이 있다면 그건 루트가 꽉 차있다는 말
+                                if self.board[nx][ny] == 3:
+                                    self.scores[team] += self.sizes[team] ** 2
+
+                                # 머리, 꼬리 위치 바꾸기
+                                self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                                self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                                self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
+                                return
                             break
 
                         for i in range(len(self.dx)):
@@ -421,7 +534,8 @@ class Problem():
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
-
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
                 idx -= 1
@@ -438,11 +552,30 @@ class Problem():
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
                 elif self.board[idx][position] == 3:
                     # tail_pos에서 찾아서 점수 주기
                     team = self.tail_pos.index([idx, position])
+
+                    for i in range(len(self.dx)):
+                        nx = self.head_pos[team][0] + self.dx[i]
+                        ny = self.head_pos[team][1] + self.dy[i]
+                        if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
+                            continue
+
+                        # 머리사람이 있다면 그건 루트가 꽉 차있다는 말
+                        if self.board[nx][ny] == 3:
+                            self.scores[team] += self.sizes[team] ** 2
+
+                        # 머리, 꼬리 위치 바꾸기
+                        self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                        self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                        self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
+                        return
+
                     # bfs로 팀 내에서 몇 번째 사람인지 찾기
                     q = deque()
                     q.append([idx, position])
@@ -483,6 +616,8 @@ class Problem():
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
                 elif self.board[idx][position] == 2:
@@ -501,6 +636,23 @@ class Problem():
 
                         if self.board[x][y] == 1:
                             team = self.head_pos.index([x, y])
+
+                            for i in range(len(self.dx)):
+                                nx = self.head_pos[team][0] + self.dx[i]
+                                ny = self.head_pos[team][1] + self.dy[i]
+                                if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
+                                    continue
+
+                                # 머리사람이 있다면 그건 루트가 꽉 차있다는 말
+                                if self.board[nx][ny] == 3:
+                                    self.scores[team] += self.sizes[team] ** 2
+
+                                # 머리, 꼬리 위치 바꾸기
+                                self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                                self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                                self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
+                                return
+
                             break
 
                         for i in range(len(self.dx)):
@@ -527,7 +679,8 @@ class Problem():
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
-
+                    self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                    self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
                 idx += 1
@@ -541,6 +694,7 @@ def main():
         # 각 팀의 이동
         for team in range(instance.m):
             instance.move(team)
+
         # 공 던지기
         instance.throw_ball(round)
 
