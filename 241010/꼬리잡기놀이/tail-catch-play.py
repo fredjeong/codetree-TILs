@@ -270,7 +270,7 @@ class Problem():
         elif direction == 1:
             # 아래에서 위쪽
             # round % self.n 열
-            idx = self.n-1
+            idx = self.n - 1
             while idx >= 0:
                 if self.board[idx][position] == 1:
                     # head_pos에서 찾아서 점수 주기
@@ -287,6 +287,22 @@ class Problem():
                 elif self.board[idx][position] == 3:
                     # tail_pos에서 찾아서 점수 주기
                     team = self.tail_pos.index([idx, position])
+
+                    for i in range(len(self.dx)):
+                        nx = self.head_pos[team][0] + self.dx[i]
+                        ny = self.head_pos[team][1] + self.dy[i]
+                        if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
+                            continue
+
+                        # 머리사람이 있다면 그건 루트가 꽉 차있다는 말
+                        if self.board[nx][ny] == 3:
+                            self.scores[team] += self.sizes[team] ** 2
+
+                            # 머리, 꼬리 위치 바꾸기
+                            self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
+                            self.board[self.head_pos[team][0]][self.head_pos[team][1]] = 1
+                            self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
+                            return
 
                     # bfs로 팀 내에서 몇 번째 사람인지 찾기
                     q = deque()
@@ -394,7 +410,7 @@ class Problem():
                     self.board[self.tail_pos[team][0]][self.tail_pos[team][1]] = 3
                     return
 
-                idx += 1
+                idx -= 1
 
         elif direction == 2:
             # 오른쪽에서 왼쪽
