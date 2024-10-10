@@ -18,8 +18,8 @@ class Problem():
         self.runner_direction = []
         for _ in range(self.m):
             x, y, d = map(int, input().split())
-            self.runner_pos.append([x-1, y-1]) # d=0: 좌우 움직임, d=1: 상하 움직임
-            self.runner_direction.append(d-1)
+            self.runner_pos.append([x-1, y-1])
+            self.runner_direction.append(d-1) # d=0: 좌우 움직임, d=1: 상하 움직임
 
         self.catcher_pos = [self.n//2, self.n//2]
 
@@ -65,17 +65,24 @@ class Problem():
             self.route.append([nx, ny])
             self.catcher_direction.append((direction + 2) % 4)
 
-
         temp = self.route[::-1]
-        temp_2 = self.catcher_direction[::-1]
+        temp_2 = self.catcher_direction[::-1][:-1]
+
         self.route = temp + self.route[1:-1]
-        self.catcher_direction = temp_2 + self.catcher_direction[1:-1]
+
+        for i in range(len(self.catcher_direction)):
+            # 처음이랑 마지막은 필요 x
+            if i==0: #or i==len(self.catcher_direction)-1:
+                continue
+            temp_2.append((self.catcher_direction[i]+2)%4)
+
+        self.catcher_direction = temp_2
         self.period = len(self.route)
 
     def get_distance(self, pos_1, pos_2):
         return abs(pos_1[0] - pos_2[0]) + abs(pos_1[1] - pos_2[1])
 
-    def runner_move(self, runner):
+    def runner_move(self, turn, runner):
         # 술래와의 거리가 3 이하인 도망자, 아직 남아있는 도망자만 움직인다
         if self.get_distance(self.runner_pos[runner], self.catcher_pos) > 3 or self.out[runner]:
             return
@@ -92,8 +99,10 @@ class Problem():
         # 격자를 벗어나는 경우 방향을 반대로 틀어준다
         if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
             d = (d + 2)%4
+
             # 바뀐 방향 저장
             self.runner_direction[runner] = d
+
             # 새로 nx, ny 정의
             nx = x + dx[d]
             ny = y + dy[d]
@@ -117,27 +126,34 @@ class Problem():
             nx = x + self.dx[d]*i
             ny = y + self.dy[d]*i
 
-            if [nx, ny] in self.runner_pos:
-                if [nx, ny] in self.tree_pos:
+            if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
+                continue
+
+            if [nx, ny] not in self.runner_pos:
+                continue
+
+            if [nx, ny] in self.tree_pos:
+                continue
+
+            for runner in range(self.m):
+                if self.runner_pos[runner] != [nx, ny]:
                     continue
-                for runner in range(self.m):
-                    if self.runner_pos[runner] != [nx, ny]:
-                        continue
-                    if self.out[runner]:
-                        continue
-                    self.out[runner] = True
-                    count += 1
+                if self.out[runner]:
+                    continue
+                self.out[runner] = True
+                count += 1
 
         self.score += turn * count
 
 def main():
     instance = Problem()
-
+    
     # 술래의 이동경로
     for turn in range(1, instance.k+1):
         for runner in range(instance.m):
-            instance.runner_move(runner)
+            instance.runner_move(turn, runner)
         instance.catcher_move(turn)
+
     print(instance.score)
 
 if __name__ == "__main__":
