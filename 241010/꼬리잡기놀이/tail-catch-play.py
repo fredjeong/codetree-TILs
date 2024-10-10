@@ -111,7 +111,7 @@ class Problem():
             # 왼쪽에서 오른쪽
             # round % self.n 행
             idx = 0
-            while True:
+            while idx < self.n:
                 if self.board[position][idx]==1:
                     # head_pos에서 찾아서 점수 주기
                     team = self.head_pos.index([position, idx])
@@ -162,7 +162,6 @@ class Problem():
                             child = []
 
                     self.scores[team] += count ** 2
-
 
                     # 머리, 꼬리 위치 바꾸기
                     self.head_pos[team], self.tail_pos[team] = self.tail_pos[team], self.head_pos[team]
@@ -219,7 +218,7 @@ class Problem():
             # 아래에서 위쪽
             # round % self.n 열
             idx = self.n-1
-            while True:
+            while idx >= 0:
                 if self.board[idx][position] == 1:
                     # head_pos에서 찾아서 점수 주기
                     team = self.head_pos.index([idx, position])
@@ -325,7 +324,7 @@ class Problem():
             # 오른쪽에서 왼쪽
             # self.n - round % self.n 행
             idx = self.n - 1
-            while True:
+            while idx >= 0:
                 if self.board[position][idx] == 1:
                     # head_pos에서 찾아서 점수 주기
                     team = self.head_pos.index([position, idx])
@@ -431,7 +430,7 @@ class Problem():
             # 위에서 아래쪽
             # self.n - round % self.n 열
             idx = 0
-            while True:
+            while idx < self.n:
                 if self.board[idx][position] == 1:
                     # head_pos에서 찾아서 점수 주기
                     team = self.head_pos.index([idx, position])
