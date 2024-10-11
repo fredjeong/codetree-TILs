@@ -20,7 +20,7 @@ class Problem():
                 # 나무가 없다면 패스
                 if self.board[i][j] <= 0:
                     continue
-                count = 0
+
                 reproduce_count = 0
                 # 나무가 있다면
                 for k in range(len(dx)):
@@ -28,12 +28,14 @@ class Problem():
                     ny = j + dy[k]
                     if nx < 0 or nx >= self.n or ny < 0 or ny >= self.n:
                         continue
+
+                    # 인접한 칸 중 나무가 있는 칸이 있다면 나무가 성장한다
                     if self.board[nx][ny] > 0:
-                        count += 1
-                    if self.board[nx][ny] == 0:
+                        self.board[i][j] += 1
+
+                    if self.board[nx][ny] == 0 and self.toxic[nx][ny]==0:
                         reproduce_count += 1
 
-                self.board[i][j] += count
                 self.reproduce_counts[i][j] = reproduce_count
 
     def tree_reproduce(self):
@@ -130,7 +132,6 @@ class Problem():
                 if self.board[nx][ny] == -1 or self.board[nx][ny] == 0:
                     break
 
-                #self.score += self.board[nx][ny]
                 self.board[nx][ny] = 0
 
 def main():
