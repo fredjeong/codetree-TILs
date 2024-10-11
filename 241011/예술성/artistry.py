@@ -91,6 +91,8 @@ class Problem():
         맞닿아 있는 변의 수를 구하는 것이 난관
         """
         adjacent_sides = self.get_adjacent_sides(group_1, group_2)
+        if adjacent_sides == 0:
+            return
         harmony = (len(self.groups[group_1]) + len(self.groups[group_2])) * self.colours[group_1] * self.colours[group_2] * adjacent_sides
         self.score += harmony
 
@@ -110,28 +112,28 @@ class Problem():
         start_y = 0
         for i in range(self.n//2):
             for j in range(self.n//2):
-                temp[start_x + j][start_y + 1 - i] = self.board[start_x + i][start_y + j]
+                temp[start_x + j][start_y + (self.n//2) - 1 - i] = self.board[start_x + i][start_y + j]
 
         # zone 2: 시작점 0, self.n//2 + 1
         start_x = 0
         start_y = self.n//2 + 1
         for i in range(self.n//2):
             for j in range(self.n//2):
-                temp[start_x + j][start_y + 1 - i] = self.board[start_x + i][start_y + j]
+                temp[start_x + j][start_y + (self.n//2) - 1 - i] = self.board[start_x + i][start_y + j]
 
         # zone 3: 시작점 self.n//2 + 1, 0
         start_x = self.n//2 + 1
         start_y = 0
         for i in range(self.n//2):
             for j in range(self.n//2):
-                temp[start_x + j][start_y + 1 - i] = self.board[start_x + i][start_y + j]
+                temp[start_x + j][start_y + (self.n//2) - 1 - i] = self.board[start_x + i][start_y + j]
 
         # zone 4: self.n//2 + 1, self.n//2 + 1
         start_x = self.n//2 + 1
         start_y = self.n//2 + 1
         for i in range(self.n//2):
             for j in range(self.n//2):
-                temp[start_x + j][start_y + 1 - i] = self.board[start_x + i][start_y + j]
+                temp[start_x + j][start_y + (self.n//2) - 1 - i] = self.board[start_x + i][start_y + j]
 
         return temp
 
