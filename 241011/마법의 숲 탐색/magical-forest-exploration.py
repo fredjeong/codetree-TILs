@@ -52,7 +52,7 @@ class Problem():
         # 이동을 종료한다
 
         # 골렘의 몸 일부가 여전히 숲을 벗어난 상태라면 숲을 리셋한다
-        if x <= 2:
+        if x <= 3:
             self.board = [[0 for _ in range(self.c)] for _ in range(self.r + 3)]
             self.exits = [[False for _ in range(self.c)] for _ in range(self.r + 3)]
             return
@@ -118,7 +118,7 @@ def main():
 
         # 골렘 이동
         instance.move(id, c, d)
-        
+
     print(instance.score)
 
 if __name__ == "__main__":
