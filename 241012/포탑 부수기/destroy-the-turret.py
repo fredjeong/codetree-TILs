@@ -174,6 +174,18 @@ class Problem():
 
             self.board[nx][ny] -= power // 2
 
+        affected = [[False for _ in range(self.m)] for _ in range(self.n)]
+        affected[target_pos[0]][target_pos[1]] = True
+        affected[attacker_pos[0]][attacker_pos[1]] = True
+        # 영향받지 않은 포탑들은 공격력을 1씩 올려준다
+        for i in range(self.n):
+            for j in range(self.m):
+                if affected[i][j]:
+                    continue
+                if self.board[i][j] <= 0:
+                    continue
+                self.board[i][j] += 1
+
 def main():
     instance = Problem()
 
