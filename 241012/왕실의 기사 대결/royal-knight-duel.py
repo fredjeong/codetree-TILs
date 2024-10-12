@@ -29,8 +29,12 @@ class Problem():
         self.dy = [0, 1, 0, -1]
 
     def clear(self, id):
-        for i in range(self.knight_pos[id][0] + self.knight_info[id][0]):
-            for j in range(self.knight_pos[id][1] + self.knight_info[id][1]):
+        x = self.knight_pos[id][0]
+        y = self.knight_pos[id][1]
+        h = self.knight_info[id][0]
+        w = self.knight_info[id][1]
+        for i in range(x, x + h):
+            for j in range(y, y + w):
                 self.board_knight[i][j] = -1
 
     def fill(self, id):
@@ -55,38 +59,11 @@ class Problem():
         nx = x + self.dx[dir]
         ny = y + self.dy[dir]
 
-        # 이동하려는 위치에 벽이 있다면 명령 취소
-        for i in range(nx, nx + h):
-            for j in range(ny, ny + w):
-                if self.board[i][j] == 2:
-                    return
-
-        # 이동하려는 모든 칸이 빈칸인지 검사
-        is_empty = True
-        for i in range(nx, nx + h):
-            for j in range(ny, ny + w):
-                if self.board_knight[i][j] != -1 and self.board_knight[i][j] != id:
-                    is_empty = False
-                    break
-            if not is_empty:
-                break
-
-        # 빈칸이라면 위치 옮기기
-        if is_empty:
-            # 원래 위치로 저장되어있던 칸들 지우기
-            self.clear(id)
-            # 새 위치 저장
-            self.knight_pos[id][0] = nx
-            self.knight_pos[id][1] = ny
-            # 보드에 채우기
-            self.fill(id)
-            return
-
-        # 여기까지 왔다는 것은 다른 기사가 존재한다는 뜻
-        # 여기서 원래 위치는 아직 비워지지 않았음
-        global s, is_wall
+        global s, is_wall, s_names
+        s_names = set()
         s = set()
         s.add((id, nx, ny))
+        s_names.add(id)
         is_wall = False
         self.interaction(id, [nx, ny], dir)
 
@@ -118,13 +95,14 @@ class Problem():
                 self.clear(knight)
 
     def interaction(self, id, pos, dir):
-        global s, is_wall
+        global s, is_wall, s_names
         """
         id: 옮겨온 기사의 번호
         pos: 옮겨온 좌표 (좌측상단 기준)
         dir: 방향 
         """
         # 새 구역에서 영향을 받는 기사가 있는지 찾는다
+
         x = pos[0]
         y = pos[1]
         h = self.knight_info[id][0]
@@ -138,27 +116,29 @@ class Problem():
                     is_wall = True
                     return
                 # 다른 기사가 있다면 그 기사를 new_ids에 추가한다
-                if self.board[i][j] != 2 and self.board_knight[i][j] != -1 and (self.board_knight[i][j], x, y) not in s:
-                    new_ids.add((self.board_knight[i][j], x, y))
+                if self.board[i][j] != 2 and self.board_knight[i][j] != id and self.board_knight[i][j] != -1 and self.board_knight[i][j] not in s_names:
+                    new_ids.add(self.board_knight[i][j])
 
         # 새롭게 발견된 기사가 없다면 그대로 종료
         if not new_ids:
             return
 
         # 새롭게 발견된 기사가 있다면 재귀함수를 작동시킨다
-        s = s | new_ids
-        for knight, _, _ in new_ids:
+        for knight in new_ids:
 
             nx = self.knight_pos[knight][0] + self.dx[dir]
             ny = self.knight_pos[knight][1] + self.dy[dir]
             self.interaction(knight, [nx, ny], dir)
+            s.add((knight, nx, ny))
+            s_names.add(knight)
 
 
 
 def main():
     instance = Problem()
 
-    for _ in range(instance.q):
+    for round in range(instance.q):
+    #for _ in range(1):
         id, dir = map(int, input().split())
         if instance.out[id-1]:
             continue
