@@ -21,6 +21,7 @@ class Problem():
 
         for i in range(self.n):
             for j in range(self.m):
+                # 이미 부서진 포탑은 고려하지 않는다
                 if self.board[i][j] <= 0:
                     continue
                 arr.append([self.board[i][j], self.time[i][j], i, j])
@@ -29,14 +30,24 @@ class Problem():
         attacker = sorted(arr, key=lambda x:[x[0], -x[1], -(x[2]+x[3]), -x[3]])[0]
         attacker_pos = [attacker[2], attacker[3]]
 
+        # 공격 시점 표시
+        self.time[attacker_pos[0]][attacker_pos[1]] = turn
+
+        arr = []
+
+        for i in range(self.n):
+            for j in range(self.m):
+                if self.board[i][j] <= 0:
+                    continue
+                if [i, j] == attacker_pos:
+                    continue
+                arr.append([self.board[i][j], self.time[i][j], i, j])
         target = sorted(arr, key=lambda x: [-x[0], x[1], x[2]+x[3], x[3]])[0]
+
         target_pos = [target[2], target[3]]
 
         # 공격자의 공격력 추가
         self.board[attacker_pos[0]][attacker_pos[1]] += self.bonus
-
-        # 공격 시점 표시
-        self.time[attacker_pos[0]][attacker_pos[1]] = turn
 
         return attacker_pos, target_pos
 
@@ -55,7 +66,6 @@ class Problem():
         q = deque()
         q.append([[attacker_pos, None]])
 
-
         best_history = None
 
         while q:
@@ -72,7 +82,6 @@ class Problem():
             # 목표 지점에 도착했다면 경로를 반환한다
             if [x, y] == target_pos:
                 # 경로 반환
-                #history.append([[x, y], dir])
                 if best_history == None:
                     best_history = history
                 else:
@@ -82,10 +91,6 @@ class Problem():
                         for idx in range(len(history)):
                             if history[idx][1] < best_history[idx][1]:
                                 best_history = history
-                                break
-                            elif history[idx][1] == best_history[idx][1]:
-                                continue
-                            elif history[idx][1] > best_history[idx][1]:
                                 break
 
             for i in range(len(dx)):
@@ -97,6 +102,7 @@ class Problem():
                     nx += self.n
                 elif nx >= self.n:
                     nx -= self.n
+
                 if ny < 0:
                     ny += self.m
                 elif ny >= self.m:
@@ -118,13 +124,13 @@ class Problem():
             affected = [[False for _ in range(self.m)] for _ in range(self.n)]
             affected[target_pos[0]][target_pos[1]] = True
             affected[attacker_pos[0]][attacker_pos[1]] = True
+
             # 타겟에게 공격자의 공격력만큼 피해를 준다
             self.board[target_pos[0]][target_pos[1]] -= self.board[attacker_pos[0]][attacker_pos[1]]
 
             # 경로상의 다른 포탑들에게 공격자의 공격력//2만큼의 피해를 준다
             # 처음과 마지막은 attacker와 target이므로 고려하지 않는다
             for id in range(1, len(best_history)-1):
-
                 self.board[best_history[id][0][0]][best_history[id][0][1]] -= self.board[attacker_pos[0]][attacker_pos[1]] // 2
                 affected[best_history[id][0][0]][best_history[id][0][1]] = True
 
@@ -193,6 +199,14 @@ def main():
     for turn in range(instance.k):
         instance.attack(turn)
 
+        # 부서지지 않은 포탑이 1개가 되면 그 즉시 중지
+        count = 0
+        for i in range(instance.n):
+            for j in range(instance.m):
+                if instance.board[i][j] > 0:
+                    count += 1
+        if count == 1:
+            break
 
     # 남아있는 포탑 중 가장 강한 포탑의 공격력 출력
     max_power = 0
