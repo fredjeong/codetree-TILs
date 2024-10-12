@@ -118,7 +118,6 @@ class Problem():
             affected = [[False for _ in range(self.m)] for _ in range(self.n)]
             affected[target_pos[0]][target_pos[1]] = True
             affected[attacker_pos[0]][attacker_pos[1]] = True
-            
             # 타겟에게 공격자의 공격력만큼 피해를 준다
             self.board[target_pos[0]][target_pos[1]] -= self.board[attacker_pos[0]][attacker_pos[1]]
 
@@ -150,6 +149,10 @@ class Problem():
         # 타겟에게 공격
         self.board[x][y] -= power
 
+        affected = [[False for _ in range(self.m)] for _ in range(self.n)]
+        affected[target_pos[0]][target_pos[1]] = True
+        affected[attacker_pos[0]][attacker_pos[1]] = True
+
         for i in range(len(dx)):
             nx = x + dx[i]
             ny = y + dy[i]
@@ -173,10 +176,8 @@ class Problem():
                 continue
 
             self.board[nx][ny] -= power // 2
+            affected[nx][ny] = True
 
-        affected = [[False for _ in range(self.m)] for _ in range(self.n)]
-        affected[target_pos[0]][target_pos[1]] = True
-        affected[attacker_pos[0]][attacker_pos[1]] = True
         # 영향받지 않은 포탑들은 공격력을 1씩 올려준다
         for i in range(self.n):
             for j in range(self.m):
@@ -191,6 +192,7 @@ def main():
 
     for turn in range(instance.k):
         instance.attack(turn)
+
 
     # 남아있는 포탑 중 가장 강한 포탑의 공격력 출력
     max_power = 0
