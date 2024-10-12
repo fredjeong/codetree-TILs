@@ -80,7 +80,7 @@ class Problem():
     def find_start(self):
         # 한 명 이상의 참가자와 출구를 포함한 가장 작은 정사각형의 좌상단 좌표를 찾는다
         length = 2
-        while length <= 5:
+        while length <= self.n:
             # 가능한 모든 좌상단 좌표를 탐색해보기
             for i in range(self.n - length + 1):
                 for j in range(self.n - length + 1):
