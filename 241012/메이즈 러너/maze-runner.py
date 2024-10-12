@@ -146,16 +146,16 @@ def main():
     instance = Problem()
 
     # K초 동안 참가자들의 이동과 미로의 회전을 반복한다
-    for _ in range(instance.k):
+    for round in range(instance.k):
         # 참가자의 이동
         instance.move()
-
-        # 미로의 회전
-        instance.rotate()
 
         # 모든 참가자가 탈출에 성공했다면 게임을 조기에 종료한다
         if False not in instance.out:
             break
+
+        # 미로의 회전
+        instance.rotate()
 
     print(instance.score)
     print(instance.exit_pos[0] + 1, instance.exit_pos[1] + 1)
