@@ -8,7 +8,7 @@ class Problem():
         self.board = [list(map(int, input().split())) for _ in range(self.n)]
 
         # 각 포탑의 가장 최근 공격 시점을 나타낸 격자
-        self.time = [[0 for _ in range(self.m)] for _ in range(self.n)]
+        self.time = [[-1 for _ in range(self.m)] for _ in range(self.n)]
 
         # 가장 약한 포탑에 주는 핸디캡
         self.bonus = self.n + self.m
@@ -29,7 +29,6 @@ class Problem():
         attacker = sorted(arr, key=lambda x:[x[0], -x[1], -(x[2]+x[3]), -x[3]])[0]
         attacker_pos = [attacker[2], attacker[3]]
 
-
         target = sorted(arr, key=lambda x: [-x[0], x[1], x[2]+x[3], x[3]])[0]
         target_pos = [target[2], target[3]]
 
@@ -38,15 +37,14 @@ class Problem():
 
         # 공격 시점 표시
         self.time[attacker_pos[0]][attacker_pos[1]] = turn
+
         return attacker_pos, target_pos
 
     def attack(self, turn):
         """
         attacker가 target을 공격
         """
-        """
-        1. 레이저 공격
-        """
+        # 레이저 공격
         attacker_pos, target_pos = self.select_attacker_target(turn)
 
         dx = [0, 1, 0, -1]
@@ -120,6 +118,7 @@ class Problem():
             affected = [[False for _ in range(self.m)] for _ in range(self.n)]
             affected[target_pos[0]][target_pos[1]] = True
             affected[attacker_pos[0]][attacker_pos[1]] = True
+            
             # 타겟에게 공격자의 공격력만큼 피해를 준다
             self.board[target_pos[0]][target_pos[1]] -= self.board[attacker_pos[0]][attacker_pos[1]]
 
