@@ -98,6 +98,7 @@ class Problem():
         # 밀려난 위치가 게임판 밖이라면 산타는 게임에서 탈락한다
         if x < 0 or x >= self.n or y < 0 or y >= self.n:
             self.out[new_id] = True
+            self.santa_pos[new_id] = [100, 100]
             return
 
         # 다른 산타가 있다면 재귀함수 실행
@@ -139,7 +140,6 @@ class Problem():
         if not arr:
             return
 
-
         best = sorted(arr, key=lambda x:[x[0], x[1]])[0]
         self.santa_pos[id] = best[2]
         dir = (best[1] + 2)%4
@@ -170,7 +170,6 @@ def main():
 
     # 게임은 총 m개의 턴에 걸쳐 진행된다
     for _ in range(instance.m):
-    #for _ in range(1):
         # 매 턴마다 루돌프가 한 번 움직이고
         instance.rudolf_move()
 
